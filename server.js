@@ -14,6 +14,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", require("./routes/auth.route"));
+app.use("/api/verify", require("./routes/tokens.route"));
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));

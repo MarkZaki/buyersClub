@@ -1,8 +1,12 @@
+const crypto = require("crypto");
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const User = require("../models/user.model");
+const Token = require("../models/token.model");
+
 const { AUTH_HEADER } = require("../constants");
 const { registerSchema, loginSchema } = require("../validators/auth.validator");
 const auth = require("../middlewares/auth.middleware");
@@ -37,8 +41,46 @@ router.post("/register", async (req, res) => {
 	// Save New User
 	try {
 		const savedUser = await user.save();
+
+		// Create a verification token for this user
+		const emailToken = new Token({
+			_userId: savedUser._id,
+			token: crypto.randomBytes(16).toString("hex")
+		});
+
+		// Save Email Token
+		const savedToken = await emailToken.save();
+
+		// Send Email
+		var transporter = nodemailer.createTransport({
+			service: "Sendgrid",
+			auth: {
+				user: process.env.SENDGRID_USERNAME,
+				pass: process.env.SENDGRID_PASSWORD
+			}
+		});
+		var mailOptions = {
+			from: process.env.SENDGRID_USERNAME,
+			to: savedUser.email,
+			subject: "Account Verification Token",
+			text:
+				"Hello,\n\n" +
+				"Please verify your account by clicking the link: \nhttp://" +
+				req.headers.host +
+				"/confirmation/" +
+				token.token +
+				".\n"
+		};
+
+		await transporter.sendMail(mailOptions);
+
+		return res
+			.status(200)
+			.send("A verification email has been sent to " + user.email + ".");
+
 		// Create and assign Token
 		const token = jwt.sign({ _id: savedUser._id }, process.env.JWT_SECRET);
+		// Return JWT
 		return res.header(AUTH_HEADER, token).json({ token: token });
 	} catch (error) {
 		res.status(400).json({ error: error });
@@ -58,6 +100,13 @@ router.post("/login", async (req, res) => {
 	const user = await User.findOne({ email: req.body.email });
 	if (!user) {
 		return res.status(400).json({ error: "email or password is wrong" });
+	}
+
+	// Make sure the user has been verified
+	if (!user.verified) {
+		return res
+			.status(401)
+			.json({ error: "Your account has not been verified" });
 	}
 
 	// Check if password is correct
