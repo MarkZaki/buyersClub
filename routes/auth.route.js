@@ -51,37 +51,44 @@ router.post("/register", async (req, res) => {
 		// Save Email Token
 		const savedToken = await emailToken.save();
 
+		console.log(process.env.GMAIL_USERNAME);
+
 		// Send Email
-		var transporter = nodemailer.createTransport({
-			service: "Sendgrid",
+		const transporter = nodemailer.createTransport("SMTP", {
+			port: 5000,
+			host: "localhost",
+			secure: false,
+			requireTLS: true,
+			tls: {
+				rejectUnauthorized: false
+			},
 			auth: {
-				user: process.env.SENDGRID_USERNAME,
-				pass: process.env.SENDGRID_PASSWORD
+				user: process.env.GMAIL_USERNAME,
+				pass: process.env.GMAIL_PASSWORD
 			}
 		});
-		var mailOptions = {
-			from: process.env.SENDGRID_USERNAME,
+		const mailOptions = {
+			from: process.env.GMAIL_USERNAME,
 			to: savedUser.email,
 			subject: "Account Verification Token",
 			text:
 				"Hello,\n\n" +
 				"Please verify your account by clicking the link: \nhttp://" +
 				req.headers.host +
-				"/confirmation/" +
+				"/api/verify/confirm/" +
 				token.token +
 				".\n"
 		};
 
-		await transporter.sendMail(mailOptions);
-
-		return res
-			.status(200)
-			.send("A verification email has been sent to " + user.email + ".");
-
-		// Create and assign Token
-		const token = jwt.sign({ _id: savedUser._id }, process.env.JWT_SECRET);
-		// Return JWT
-		return res.header(AUTH_HEADER, token).json({ token: token });
+		try {
+			const sentMail = await transporter.sendMail(mailOptions);
+			console.log(sentMail);
+			return res.json({
+				msg: `A verification email has been sent to  + ${savedUser.email} + .`
+			});
+		} catch (error) {
+			res.status(400).json({ error: error });
+		}
 	} catch (error) {
 		res.status(400).json({ error: error });
 	}
