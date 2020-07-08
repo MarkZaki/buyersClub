@@ -38,51 +38,51 @@ router.post("/register", async (req, res) => {
 		password: hashedPassword
 	});
 
+	// Create a verification token for this user
+	const emailToken = new Token({
+		_userId: savedUser._id,
+		token: crypto.randomBytes(16).toString("hex")
+	});
+
+	// Save Email Token
+	const savedToken = await emailToken.save();
+
+	console.log(process.env.GMAIL_USERNAME);
+
+	// Send Email
+	const transporter = nodemailer.createTransport({
+		service: "gmail",
+		auth: {
+			user: process.env.GMAIL_USERNAME,
+			pass: process.env.GMAIL_PASSWORD
+		}
+	});
+	const mailOptions = {
+		from: process.env.GMAIL_USERNAME,
+		to: user.email,
+		subject: "Account Verification Token",
+		text:
+			"Hello,\n\n" +
+			"Please verify your account by clicking the link: \nhttp://" +
+			req.headers.host +
+			"/api/verify/confirm/" +
+			savedToken.token +
+			".\n"
+	};
+
+	try {
+		const sentMail = await transporter.sendMail(mailOptions);
+		console.log(sentMail);
+		res.json({
+			msg: `A verification email has been sent to  + ${savedUser.email} + .`
+		});
+	} catch (error) {
+		return res.status(400).json({ error: error });
+	}
+
 	// Save New User
 	try {
 		const savedUser = await user.save();
-
-		// Create a verification token for this user
-		const emailToken = new Token({
-			_userId: savedUser._id,
-			token: crypto.randomBytes(16).toString("hex")
-		});
-
-		// Save Email Token
-		const savedToken = await emailToken.save();
-
-		console.log(process.env.GMAIL_USERNAME);
-
-		// Send Email
-		const transporter = nodemailer.createTransport({
-			service: "gmail",
-			auth: {
-				user: process.env.GMAIL_USERNAME,
-				pass: process.env.GMAIL_PASSWORD
-			}
-		});
-		const mailOptions = {
-			from: process.env.GMAIL_USERNAME,
-			to: savedUser.email,
-			subject: "Account Verification Token",
-			text:
-				"Hello,\n\n" +
-				"Please verify your account by clicking the link: \nhttp://" +
-				req.headers.host +
-				"/api/verify/confirm/" +
-				token.token +
-				".\n"
-		};
-
-		try {
-			const sentMail = await transporter.sendMail(mailOptions);
-			console.log(sentMail);
-			return res.json({
-				msg: `A verification email has been sent to  + ${savedUser.email} + .`
-			});
-		} catch (error) {
-			res.status(400).json({ error: error });
-		}
 	} catch (error) {
 		res.status(400).json({ error: error });
 	}
