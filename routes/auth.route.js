@@ -40,7 +40,7 @@ router.post("/register", async (req, res) => {
 
 	// Create a verification token for this user
 	const emailToken = new Token({
-		_userId: savedUser._id,
+		_userId: user._id,
 		token: crypto.randomBytes(16).toString("hex")
 	});
 
