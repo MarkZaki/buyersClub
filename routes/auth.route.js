@@ -54,14 +54,7 @@ router.post("/register", async (req, res) => {
 		console.log(process.env.GMAIL_USERNAME);
 
 		// Send Email
-		const transporter = nodemailer.createTransport("SMTP", {
-			port: 5000,
-			host: "localhost",
-			secure: false,
-			requireTLS: true,
-			tls: {
-				rejectUnauthorized: false
-			},
+		const transporter = nodemailer.createTransport({
 			auth: {
 				user: process.env.GMAIL_USERNAME,
 				pass: process.env.GMAIL_PASSWORD
