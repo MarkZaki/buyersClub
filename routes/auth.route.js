@@ -2,8 +2,7 @@ const crypto = require("crypto");
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const sgMail = require("@sendgrid/mail");
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const nodemailer = require("nodemailer");
 
 const User = require("../models/user.model");
 const Token = require("../models/token.model");
@@ -48,10 +47,22 @@ router.post("/register", async (req, res) => {
 	// Save Email Token
 	const savedToken = await emailToken.save();
 
+	console.log(process.env.GMAIL_USERNAME);
+
 	// Send Email
-	const msg = {
-		to: user.email,
+	const transporter = nodemailer.createTransport({
+		service: "gmail",
+		host: "smtp.gmail.com",
+		port: 587,
+		secure: false,
+		auth: {
+			user: process.env.GMAIL_USERNAME,
+			pass: process.env.GMAIL_PASSWORD
+		}
+	});
+	const mailOptions = {
 		from: process.env.GMAIL_USERNAME,
+		to: user.email,
 		subject: "Account Verification Token",
 		text:
 			"Hello,\n\n" +
@@ -63,9 +74,10 @@ router.post("/register", async (req, res) => {
 	};
 
 	try {
-		sgMail.send(msg);
+		const info = await transporter.sendMail(mailOptions);
+		res.json({ msg: info });
 	} catch (error) {
-		console.error(error);
+		return res.status(400).json({ error: error });
 	}
 
 	// Save New User
