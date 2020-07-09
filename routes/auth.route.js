@@ -1,4 +1,3 @@
-const crypto = require("crypto");
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -10,6 +9,8 @@ const Token = require("../models/token.model");
 const { AUTH_HEADER } = require("../constants");
 const { registerSchema, loginSchema } = require("../validators/auth.validator");
 const auth = require("../middlewares/auth.middleware");
+
+const { generateVerificationCode } = require("../utils");
 
 // @DESC Register User Route
 // @ROUTE POST /api/auth/register
@@ -41,7 +42,7 @@ router.post("/register", async (req, res) => {
 	// Create a verification token for this user
 	const emailToken = new Token({
 		_userId: user._id,
-		token: crypto.randomBytes(16).toString("hex")
+		token: generateVerificationCode()
 	});
 
 	// Save Email Token
@@ -64,13 +65,7 @@ router.post("/register", async (req, res) => {
 		from: process.env.GMAIL_USERNAME,
 		to: user.email,
 		subject: "Account Verification Token",
-		text:
-			"Hello,\n\n" +
-			"Please verify your account by clicking the link: \nhttp://" +
-			req.headers.host +
-			"/api/verify/confirm/" +
-			savedToken.token +
-			".\n"
+		html: `Your Verification Code is: <p>${savedToken.token}</p>`
 	};
 
 	try {
@@ -129,7 +124,7 @@ router.post("/login", async (req, res) => {
 // @ROUTE GET /api/auth/
 router.get("/", auth, async (req, res) => {
 	try {
-		const user = await User.findById(req.user.id).select("-password");
+		const user = await User.findById(req.user._id).select("-password");
 		res.json(user);
 	} catch (error) {
 		console.error(error);

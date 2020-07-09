@@ -1,6 +1,6 @@
-# buyersClub
+# buyersclub
 
-buyersClub is a full-featured E-commerce website with MERN stack technology
+buyersclub is a full-featured E-commerce website with MERN stack technology
 
 to start the server:
 
