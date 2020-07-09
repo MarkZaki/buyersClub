@@ -52,6 +52,10 @@ router.post("/register", async (req, res) => {
 	// Send Email
 	const transporter = nodemailer.createTransport({
 		service: "gmail",
+		host: "smtp.gmail.com",
+		port: 587,
+		secure: false,
+		requireTLS: true,
 		auth: {
 			user: process.env.GMAIL_USERNAME,
 			pass: process.env.GMAIL_PASSWORD
