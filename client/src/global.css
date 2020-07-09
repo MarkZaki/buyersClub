@@ -1,0 +1,42 @@
+/* Global */
+body {
+	overflow-y: scroll;
+}
+
+/* Utils */
+
+.text-bold {
+	font-weight: bold;
+}
+
+.text-center {
+	text-align: center;
+}
+
+/* Nav */
+
+.bc__nav__brand {
+	transition: all 0.3s ease;
+}
+
+.bc__nav__brand:hover,
+.bc__nav__brand:focus,
+.bc__nav__brand:active {
+	outline: none;
+	transform: scale(1.2);
+}
+
+.bc__nav__link:hover,
+.bc__nav__link:focus,
+.bc__nav__link:active {
+	text-decoration: none;
+	outline: none;
+}
+
+/* Register & Login */
+
+.bc__form__card {
+	max-width: 600px;
+	margin: 2em auto;
+	padding: 3em;
+}
