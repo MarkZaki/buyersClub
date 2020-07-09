@@ -77,11 +77,7 @@ router.post("/register", async (req, res) => {
 		const info = await transporter.sendMail(mailOptions);
 		res.json({ msg: info });
 	} catch (error) {
-<<<<<<< HEAD
 		return res.status(400).json({ error: error });
-=======
-		return res.status(400).json({error: error})
->>>>>>> 35878219529210e606cd29261e7d4be9ff710dc5
 	}
 
 	// Save New User
