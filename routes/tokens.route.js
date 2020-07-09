@@ -5,7 +5,14 @@ const User = require("../models/user.model");
 
 const auth = require("../middlewares/auth.middleware");
 
+const { tokenSchema } = require("../validators/token.validator");
+
 router.post("/confirm", auth, async (req, res) => {
+	// Validate Request Body
+	const { error } = tokenSchema.validate(req.body);
+	if (error) {
+		return res.status(400).json({ error: error.details[0].message });
+	}
 	// fetch user
 	const user = await User.findById(req.user._id).select("-password");
 	// find matching token
