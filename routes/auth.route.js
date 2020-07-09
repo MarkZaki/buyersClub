@@ -75,7 +75,7 @@ router.post("/register", async (req, res) => {
 
 	try {
 		const info = await transporter.sendMail(mailOptions);
-		res.json({ msg: info });
+		console.log(info.messageId);
 	} catch (error) {
 		return res.status(400).json({ error: error });
 	}
