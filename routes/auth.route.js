@@ -65,7 +65,7 @@ router.post("/register", async (req, res) => {
 		from: process.env.GMAIL_USERNAME,
 		to: user.email,
 		subject: "Account Verification Token",
-		html: `Your Verification Code is: <p>${savedToken.token}</p>`
+		text: `Your Verification Code is: ${savedToken.token}`
 	};
 
 	try {
