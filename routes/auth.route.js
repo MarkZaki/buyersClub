@@ -65,7 +65,7 @@ router.post("/register", async (req, res) => {
 	try {
 		sgMail.send(msg);
 	} catch (error) {
-		console.error(error);
+		return res.status(400).json({error: error})
 	}
 
 	// Save New User
