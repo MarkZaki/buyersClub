@@ -1,81 +1,69 @@
 import React, { useState } from "react";
-import { Card, Form, FormGroup, Input, Label } from "reactstrap";
+import { Card, Form, Button } from "reactstrap";
+import { BcInput } from "../../components/widgets/input.component";
+
+import { handleValidate } from "../../validators/auth.validator";
+import { isEmpty } from "../../utils";
+
+const formSchema = {
+	name: "",
+	email: "",
+	phone: "",
+	password: ""
+};
 
 export const RegisterPage = () => {
-	const [state, setState] = useState({
-		name: "",
-		email: "",
-		phone: "",
-		password: "",
-		confirmedPassword: ""
-	});
+	const [state, setState] = useState(formSchema);
+	const [errors, setErrors] = useState(formSchema);
 
-	const handleChange = e =>
+	const handleSubmit = e => {
+		e.preventDefault();
+		const { errors } = handleValidate(state);
+
+		if (!isEmpty(errors)) {
+			setErrors(errors);
+		} else {
+			// SERVICES
+		}
+	};
+	const handleChange = e => {
 		setState({ ...state, [e.target.name]: e.target.value });
-
+	};
 	return (
 		<Card className="bc__form__card">
 			<h2 className="text-center text-bold mb-4">Register</h2>
-			<Form>
-				<FormGroup>
-					<Label for="name_input">Name:</Label>
-					<Input
-						type="text"
-						name="name"
-						id="name_input"
-						onChange={handleChange}
-						value={state.name}
-					/>
-				</FormGroup>
-				<FormGroup>
-					<Label for="email_input">Email:</Label>
-					<Input
-						type="email"
-						name="email"
-						id="email_input"
-						onChange={handleChange}
-						value={state.email}
-					/>
-				</FormGroup>
-				<FormGroup>
-					<Label for="phone_input">Phone:</Label>
-					<Input
-						type="tel"
-						name="phone"
-						id="phone_input"
-						onChange={handleChange}
-						value={state.phone}
-					/>
-				</FormGroup>
-				<FormGroup>
-					<Label for="password_input">Password:</Label>
-					<Input
-						type="password"
-						name="password"
-						id="password_input"
-						onChange={handleChange}
-						value={state.password}
-					/>
-				</FormGroup>
-				<FormGroup>
-					<Label for="confirm_password_input">Confirm Password:</Label>
-					<Input
-						type="password"
-						name="confirmedPassword"
-						id="confirm_password_input"
-						onChange={handleChange}
-						value={state.confirmedPassword}
-					/>
-				</FormGroup>
-				<FormGroup>
-					<Input
-						className="btn btn-success btn-lg mt-2"
-						type="submit"
-						name="name"
-						id="submit_input"
-						value="Register"
-					/>
-				</FormGroup>
+			<Form onSubmit={handleSubmit}>
+				<BcInput
+					id="name"
+					type="text"
+					onChange={handleChange}
+					value={state.name}
+					err={errors.name}
+				/>
+				<BcInput
+					id="email"
+					type="email"
+					onChange={handleChange}
+					value={state.email}
+					err={errors.email}
+				/>
+				<BcInput
+					id="phone"
+					type="tel"
+					onChange={handleChange}
+					value={state.phone}
+					err={errors.phone}
+				/>
+				<BcInput
+					id="password"
+					type="password"
+					onChange={handleChange}
+					value={state.password}
+					err={errors.password}
+				/>
+				<Button color="success" className="mt-2 btn-block">
+					Register
+				</Button>
 			</Form>
 		</Card>
 	);
