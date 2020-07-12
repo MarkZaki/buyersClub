@@ -41,12 +41,9 @@ router.post("/confirm", auth, async (req, res) => {
 	// save user
 	try {
 		const savedUser = await user.save();
-		const deletedToken = await token.remove();
-		return res.json({
-			msg: `${savedUser.name}, Your email is now verified`,
-			verified: savedUser.verified,
-			deletedToken: deletedToken.token
-		});
+		delete savedUser.password;
+		await token.remove();
+		return res.json({ user: savedUser });
 	} catch (error) {
 		return res.status(400).json({ error: error });
 	}
